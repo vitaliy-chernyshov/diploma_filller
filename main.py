@@ -185,5 +185,5 @@ if __name__ == '__main__':
         recipe_name = f'recipe_{i}'
         ingredients = random.choices(all_ingredients, k=5)
         tags = [tag['id'] for tag in random.choices(all_tags, k=len(all_tags) // 2)]
-        json = create_json_for_recipe(recipe_name)
+        json = create_json_for_recipe(recipe_name, ingredients, tags)
         post_recipe(token, json)
