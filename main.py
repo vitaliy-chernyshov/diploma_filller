@@ -1,20 +1,12 @@
-import base64
-import io
 import random
 from dataclasses import asdict, dataclass
-from pathlib import Path
 from urllib.parse import urljoin
 
 import requests
-from PIL import Image, ImageDraw, ImageFont
 from tqdm import tqdm
 
-BASE_DIR = Path(__file__).parent
-IMAGES_DIR = BASE_DIR / 'images'
-
-SERVER = 'http://localhost:8000'  # ip here, like http://127.0.0.1/
-
-API_URL = urljoin(SERVER, 'api/')
+from constants import API_URL
+from images import gen_image
 
 
 @dataclass
@@ -25,46 +17,6 @@ class User:
     email: str
     first_name: str
     last_name: str
-
-
-def gen_image(
-        text: str,
-        font_size=50,
-        font='arial',
-        color=(255, 255, 255),
-        x_size=500,
-        y_size=500
-) -> str:
-    """
-    The gen_image function takes in a string, and generates an image with the
-    text centered. The function also takes in optional parameters for font size,
-    font type, background color (default white), and x and y sizes of the image
-    (default 500x500). The function saves the generated images to a folder
-    called 'images'
-
-    :param text: str: Pass in the text that will be used to generate the image
-    :param font_size: Set the size of the text
-    :param font: Set the font of the text
-    :param color: Set the background color of the image
-    :param x_size: Set the width of the image
-    :param y_size: Set the height of the image
-    :return: None
-    """
-    img = Image.new('RGB', (x_size, y_size), color=color)
-
-    font = ImageFont.truetype(font, font_size)
-
-    draw = ImageDraw.Draw(img)
-    *_, text_width, text_height = draw.textbbox((0, 0), text, font=font)
-    x = (img.width - text_width) // 2
-    y = (img.height - text_height) // 16
-    draw.text((x, y), text, font=font, fill=(0, 0, 0))
-
-    buffered = io.BytesIO()
-
-    img.save(buffered, format='PNG')
-    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-    return "data:image/jpeg;base64," + img_str
 
 
 def create_user(user: User):
@@ -141,7 +93,7 @@ def create_json_for_recipe(
         name=recipe_name,
         text=' '.join([random.choice(ingredient['name'].split())
                        for ingredient in ingredients]),
-        image=gen_image(text=recipe_name),
+        image=gen_image(title=recipe_name),
         cooking_time=random.randint(1, 100))
     return json
 
