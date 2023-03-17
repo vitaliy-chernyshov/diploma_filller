@@ -3,6 +3,7 @@ from dataclasses import asdict, dataclass
 from urllib.parse import urljoin
 
 import requests
+from faker import Faker
 from tqdm import tqdm
 
 from constants import API_URL
@@ -120,16 +121,24 @@ def post_recipe(token, json):
     return response.json()
 
 
+def create_random_person():
+    faker = Faker(['ru-ru'])
+    json = dict(
+        email=faker.email(),
+        username=faker.user_name(),
+        first_name=faker.first_name_male(),
+        last_name=faker.last_name_male(),
+        password=faker.password()
+
+    )
+    return json
+
 if __name__ == '__main__':
-    example = {
-        "email": "vpupkin@yandex.ru",
-        "username": "vasya.pupkin",
-        "first_name": "Вася",
-        "last_name": "Пупкин",
-        "password": "Qwerty123"
-    }
-    user1 = User(**example)
-    token = get_token(user1)
+
+    user = User(**create_random_person())
+    # print(user1)
+    create_user(user)
+    token = get_token(user)
     all_ingredients = get_all_ingredients()
     all_tags = get_all_tags()
 
