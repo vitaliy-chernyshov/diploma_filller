@@ -78,14 +78,14 @@ def create_random_person():
     return json
 
 
-async def main(RECIPES_NUMBER):
+async def main(recipes_number: int):
     """
     The main function creates a user, gets the token for that user,
     gets all ingredients and tags from the database. Then it creates
     a list of tasks to post recipes with random names and random
     ingredients/tags. The number of recipes is specified by RECIPES_NUMBER.
 
-    :param RECIPES_NUMBER: Specify the number of recipes to be created
+    :param recipes_number: Specify the number of recipes to be created
     :return: A coroutine which is a future-like object
     """
     async with aiohttp.ClientSession() as session:
@@ -95,17 +95,17 @@ async def main(RECIPES_NUMBER):
         all_ingredients = await get_all_ingredients(session)
         all_tags = await get_all_tags(session)
         tasks = []
-        for i in tqdm(range(RECIPES_NUMBER)):
+        for i in tqdm(range(recipes_number)):
             recipe_name = f'recipe_{i}'
             ingredients = random.sample(all_ingredients, k=5)
             tags = [
                 tag['id']
                 for tag in random.sample(all_tags, k=len(all_tags) // 2)
             ]
-            json = await create_json_for_recipe(
+            recipe = await create_json_for_recipe(
                 recipe_name, session, ingredients, tags
             )
-            task = asyncio.ensure_future(post_recipe(token, json, session))
+            task = asyncio.ensure_future(post_recipe(token, recipe, session))
             tasks.append(task)
         await asyncio.gather(*tasks)
 
