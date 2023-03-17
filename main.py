@@ -32,16 +32,16 @@ async def create_json_for_recipe(
     """
     if tags is None:
         tags = [
-            tag['id'] for tag in random.choices(await get_all_tags(session))
+            tag['id'] for tag in random.sample(await get_all_tags(session), k=1)
         ]
     if ingredients is None:
-        ingredients = random.choices(
+        ingredients = random.sample(
             await get_all_ingredients(session), k=ingredients_count
         )
 
     recipe_text = ' '.join(
         [
-            random.choice(ingredient['name'].split())
+            random.sample(ingredient['name'].split(), k=1)[0]
             for ingredient in ingredients
         ]
     )
@@ -97,10 +97,10 @@ async def main(RECIPES_NUMBER):
         tasks = []
         for i in tqdm(range(RECIPES_NUMBER)):
             recipe_name = f'recipe_{i}'
-            ingredients = random.choices(all_ingredients, k=5)
+            ingredients = random.sample(all_ingredients, k=5)
             tags = [
                 tag['id']
-                for tag in random.choices(all_tags, k=len(all_tags) // 2)
+                for tag in random.sample(all_tags, k=len(all_tags) // 2)
             ]
             json = await create_json_for_recipe(
                 recipe_name, session, ingredients, tags
