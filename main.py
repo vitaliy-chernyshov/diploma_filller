@@ -87,14 +87,15 @@ def create_json_for_recipe(
     if ingredients is None:
         ingredients = random.choices(get_all_ingredients(), k=ingredients_count)
 
+    recipe_text = ' '.join([random.choice(ingredient['name'].split())
+                            for ingredient in ingredients])
     json = dict(
         ingredients=[{**ingredient, 'amount': random.randint(1, 100)}
                      for ingredient in ingredients],
         tags=tags,
         name=recipe_name,
-        text=' '.join([random.choice(ingredient['name'].split())
-                       for ingredient in ingredients]),
-        image=gen_image(title=recipe_name),
+        text=recipe_text,
+        image=gen_image(title=recipe_name, text=recipe_text),
         cooking_time=random.randint(1, 100))
     return json
 
@@ -133,10 +134,10 @@ def create_random_person():
     )
     return json
 
+
 if __name__ == '__main__':
 
     user = User(**create_random_person())
-    # print(user1)
     create_user(user)
     token = get_token(user)
     all_ingredients = get_all_ingredients()

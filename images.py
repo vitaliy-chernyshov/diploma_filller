@@ -76,7 +76,7 @@ def draw_title(title: str, img: Image, draw: ImageDraw, font_file: str,
     font = get_font(font_file, font_size)
     *_, text_width, text_height = draw.textbbox((0, 0), title, font=font)
     x, y = get_title_position(img.size, (text_width, text_height))
-    draw.text((x, y), text, font=font, fill=color)
+    draw.text((x, y), title, font=font, fill=color)
 
 
 def draw_text(text: str, img: Image, draw: ImageDraw, font_file: str,
@@ -87,12 +87,6 @@ def draw_text(text: str, img: Image, draw: ImageDraw, font_file: str,
     x, y = get_text_position(img.size, (text_width, text_height))
 
     draw.text((x, y), text, font=font, fill=color)
-
-
-def draw_text_with_font(text: str, draw: ImageDraw,
-                        font: ImageFont.FreeTypeFont, color: str,
-                        position: tuple) -> None:
-    draw.text(position, text, font=font, fill=color)
 
 
 def get_font(font_file: str, font_size: int):
