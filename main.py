@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import random
 
 import aiohttp
@@ -13,6 +14,7 @@ from api import (
     get_all_ingredients,
 )
 from constants import RECIPES_NUMBER
+from exceptions import DatabaseLookupError
 from images import gen_image
 from models import User
 
@@ -41,7 +43,7 @@ async def create_json_for_recipe(
 
     recipe_text = ' '.join(
         [
-            random.sample(ingredient['name'].split(), k=1)[0]
+            random.choice(ingredient['name'].split())
             for ingredient in ingredients
         ]
     )
@@ -92,15 +94,23 @@ async def main(recipes_number: int):
         user = User(**create_random_person())
         await create_user(user, session)
         token = await get_token(user, session)
+
         all_ingredients = await get_all_ingredients(session)
+        if not all_ingredients:
+            raise DatabaseLookupError('No ingredients found in database')
+
         all_tags = await get_all_tags(session)
+        if not all_tags:
+            raise DatabaseLookupError('No tags found in database')
+
+        tags_used = 1 if len(all_tags) == 1 else len(all_tags) // 2
         tasks = []
         for i in tqdm(range(recipes_number)):
             recipe_name = f'recipe_{i}'
             ingredients = random.sample(all_ingredients, k=5)
             tags = [
                 tag['id']
-                for tag in random.sample(all_tags, k=len(all_tags) // 2)
+                for tag in random.sample(all_tags, k=tags_used)
             ]
             recipe = await create_json_for_recipe(
                 recipe_name, session, ingredients, tags
@@ -111,4 +121,14 @@ async def main(recipes_number: int):
 
 
 if __name__ == '__main__':
-    asyncio.run(main(RECIPES_NUMBER))
+    logging.basicConfig(level=logging.INFO)
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+
+    try:
+        asyncio.run(main(RECIPES_NUMBER))
+    except DatabaseLookupError as error:
+        logger.error(msg=error)
+    else:
+        logger.info(f"All {RECIPES_NUMBER} recipes were created successfully.")
